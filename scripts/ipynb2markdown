@@ -1,0 +1,56 @@
+#!/usr/bin/env python
+import json
+import sys
+
+# Check if there is an argument
+if len(sys.argv) < 2:
+    print "please provide a filename"
+    exit()
+
+# Do some filename sorting
+nbfilename = sys.argv[1]
+filename = nbfilename+'.markdown'
+if nbfilename[-6:] == '.ipynb':
+    filename =  nbfilename[:-6]+'.markdown'
+
+
+# Filebuffer
+buf = ""
+
+try:
+    with open(nbfilename, 'r') as f_in:
+        try:
+            page = json.loads(f_in.read())
+
+            for cell in page['worksheets'][0]['cells']:
+                if cell['cell_type'] == 'markdown':
+                    for line in cell['source']:
+                        buf += line
+                elif cell['cell_type'] == 'code':
+                    buf += "\n\n{% highlight python %}\n"
+                    for line in cell['input']:
+                        buf += line
+                    buf += "\n{% endhighlight %}\n"
+
+                    if len(cell['outputs']) > 0:
+                        buf += '\n<div class="output">\n'
+                        for line in cell['outputs'][0]['text']:
+                            buf += line.replace('>', "&gt;,")
+
+                        buf += '</div>\n'
+
+        except:
+            "Not an IPython Notebook file(?)"
+
+        
+except IOError:
+    print "Error reading file, does it exist?"
+    exit(1)
+
+try:
+    with open(filename, 'w') as f_out:
+        f_out.write(buf)
+except IOError:
+    print "Can't write to output file"
+    exit(1)
+
