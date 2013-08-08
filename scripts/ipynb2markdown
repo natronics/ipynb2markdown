@@ -22,6 +22,11 @@ try:
         try:
             page = json.loads(f_in.read())
 
+            buf += '---\n'
+            buf += 'layout: notebook\n'
+            buf += 'title: %s\n' % page['metadata']['name']
+            buf += '---\n\n'
+
             for cell in page['worksheets'][0]['cells']:
                 if cell['cell_type'] == 'markdown':
                     for line in cell['source']:
@@ -34,8 +39,13 @@ try:
 
                     if len(cell['outputs']) > 0:
                         buf += '\n<div class="output">\n'
-                        for line in cell['outputs'][0]['text']:
-                            buf += line.replace('>', "&gt;,")
+
+                        if cell['outputs'][0]['output_type'] == 'stream':
+                            buf += '<pre>\n'
+                            for line in cell['outputs'][0]['text']:
+                                buf += '<span class="prompt">&gt;</span> '
+                                buf += line.replace('>', "&gt;,")
+                            buf += '</pre>\n'
 
                         buf += '</div>\n'
 
