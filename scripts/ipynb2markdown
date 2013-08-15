@@ -29,8 +29,11 @@ try:
 
             for cell in page['worksheets'][0]['cells']:
                 if cell['cell_type'] == 'markdown':
+                    buf += '\n'
                     for line in cell['source']:
                         buf += line
+                    buf += '\n'
+
                 elif cell['cell_type'] == 'code':
                     buf += "\n\n{% highlight python %}\n"
                     for line in cell['input']:
@@ -46,6 +49,12 @@ try:
                                 buf += '<span class="prompt">&gt;</span> '
                                 buf += line.replace('>', "&gt;,")
                             buf += '</pre>\n'
+
+                        elif cell['outputs'][0]['output_type'] == 'pyout':
+                            svg =  cell['outputs'][0].get('svg', None)
+                            for line in svg:
+                                buf += line
+
 
                         buf += '</div>\n'
 
