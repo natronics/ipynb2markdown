@@ -55,6 +55,10 @@ try:
                             for line in svg:
                                 buf += line
 
+                        elif cell['outputs'][0]['output_type'] == 'display_data':
+                            png = cell['outputs'][0].get('png', None)
+                            buf += '<img alt="" src="data:image/png;base64,' + png + '">'
+
 
                         buf += '</div>\n'
 
